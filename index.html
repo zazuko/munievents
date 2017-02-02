@@ -16,9 +16,8 @@
         "label1": "parent_name",
         "label2": "child_name",
         // for d3sparql.sankey()
-        "width":   750,
+        "width":   800,
         "height": 12000,
-        "margin":   10,
         "selector": "#result"
       }
       d3sparql.sankey(json, config)
@@ -52,6 +51,7 @@
   </head>
   <body>
     <div id="query" style="margin: 10px">
+    <div class="container">
       <h1>Municipality Change Events</h1>
       <h3>All events since 1960</h3>
       <form class="form-inline">
@@ -92,7 +92,7 @@ WHERE {
 }
 ORDER BY ?eventid         
       </textarea>
-    </div>
     <div id="result"></div>
+    </div>
   </body>
 </html>
