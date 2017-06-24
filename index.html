@@ -91,7 +91,7 @@ WHERE {
   FILTER(?admode IN (ech71:21, ech71:23)).
   FILTER(?abmode IN (ech71:29, ech71:23)).
   
-  BIND (CONCAT(?_child_name, ' (', year(?eventdate),')') AS ?child_name).
+  BIND (CONCAT(?_child_name, ' (', str(year(?eventdate)),')') AS ?child_name).
 }
 ORDER BY ?eventid         
      </textarea>
