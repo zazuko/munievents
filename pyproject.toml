@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "munievents"
+version = "0.1.0"
+description = ""
+authors = ["Magdalena Surowka <magdalena.surowka@zazuko.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+dash = "^1.18.1"
+requests = "^2.25.1"
+dash_html_components = "^1.1.1"
+pandas = "^1.2.0"
+networkx = "^2.5"
+matplotlib = "^3.3.3"
+ipykernel = "^5.4.2"
+pygraphviz = "^1.6"
+dash_cytoscape = "^0.2.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
