@@ -113,31 +113,48 @@ class Classifications(SparqlClient):
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX ech71: <http://classifications.data.admin.ch/code/ech0071/>
 
-        SELECT ?new_commune ?old_commune ?eventdate ?ab_label ?ad_label ?abolition_mode ?admission_mode
-
+        SELECT ?parent_name ?parent_admission ?parent_abolition ?child_name ?child_admission ?child_abolition ?eventdate ?ab_label ?ad_label
         WHERE {
 
         ?event a gont:MunicipalityChangeEvent ;
             gont:id ?eventid ;
             gont:date ?eventdate .
 
-            ?parent a gont:MunicipalityVersion ;
-            gont:shortName ?new_commune ;
+        ?parent a gont:MunicipalityVersion ;
+            gont:shortName ?parent_name ;
             gont:abolitionMode ?abolition_mode ;
             gont:abolitionEvent ?event .
 
-            ?child a gont:MunicipalityVersion ;
-            gont:shortName ?old_commune ;
+        ?child a gont:MunicipalityVersion ;
+            gont:shortName ?child_name ;
             gont:admissionMode ?admission_mode ;
             gont:admissionEvent ?event .
 
-            ?abolition_mode <http://www.w3.org/2004/02/skos/core#prefLabel> ?ab_label.
-            ?admission_mode <http://www.w3.org/2004/02/skos/core#prefLabel> ?ad_label.
+        ?parent gont:admissionEvent ?_parent_admission.
+        ?_parent_admission gont:date ?__parent_admission.
+        ?parent gont:abolitionEvent ?_parent_abolition.
+        ?_parent_abolition gont:date ?__parent_abolition.
+
+        ?child gont:admissionEvent ?_child_admission.
+        ?_child_admission gont:date ?__child_admission.
+
+        OPTIONAL {
+            ?child gont:abolitionEvent ?_child_abolition.
+            ?_child_abolition gont:date ?__child_abolition.
+            BIND (year(?__child_abolition) AS ?child_abolition).
+        }
+
+        ?abolition_mode <http://www.w3.org/2004/02/skos/core#prefLabel> ?ab_label.
+        ?admission_mode <http://www.w3.org/2004/02/skos/core#prefLabel> ?ad_label.
 
         FILTER(?admission_mode IN (ech71:20, ech71:21, ech71:23, ech71:24, ech71:26)).
         FILTER(?abolition_mode IN (ech71:23, ech71:24, ech71:26, ech71:29)).
+
+      	BIND (year(?__parent_abolition) AS ?parent_abolition).
+        BIND (year(?__parent_admission) AS ?parent_admission).
+        BIND (year(?__child_admission) AS ?child_admission).
         }
-        ORDER BY ?eventid
+        order by ?eventid
         """
 
         return self.send_query(query)

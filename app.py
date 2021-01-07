@@ -1,56 +1,14 @@
 import dash
-import dash_core_components as dcc
 import dash_html_components as html
+import dash_core_components as dcc
 import dash_cytoscape as cyto
 from dash.dependencies import Input, Output
-import plotly.express as px
-from api_clients import SparqlClient
-import networkx as nx
-import json
-
-import networkx as nx
-import matplotlib.pyplot as plt
-
-from utils import get_municipal_data
-
-SCREEN_WIDTH = 1600
-SCREEN_HEIGHT = 1000
-
-colormap = {
-    "renamed": "black",
-    "reshaped": "blue",
-    "formed": "green",
-    "merged to": "orange",
-    "splitted to": "violet"
-}
-
-def generate_municipal_relation():
-
-    df = get_municipal_data()
-    df = df[0:50]
-
-    elements = []
-
-    for source, target, event, date in zip(df["new_commune"], df["old_commune"], df["event"], df["eventdate"]):
-        items = [
-            {"data": {"id": source, "label": source}, "class": "commune"},
-            {"data": {"id": target, "label": target}, "class": "commune"}
-        ]
-
-        if event :
-            items += {"data": {"source": source, "target": target, "label": event, "color": colormap[event], "date": date.year}},
-
-        elements += items
-    return elements
 
 
-cyto.load_extra_layouts()
+from utils import get_communes, COLORMAP, create_graph, get_subgraph, networkx2cytoscape
 
-elements = generate_municipal_relation()
-
-app = dash.Dash(__name__)
-
-
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 600
 
 def generate_legend(colormap):
 
@@ -73,20 +31,42 @@ def generate_legend(colormap):
 
         legend.append(item)
 
-    return legend
+    return html.Div(children=legend)
 
-legend = generate_legend(colormap)
-graph = [cyto.Cytoscape(
+def generate_commune_selector():
+
+    communes = get_communes()
+    options = []
+    for commune_id, commune_name in sorted(communes.items()):
+        options.append({
+            "label": commune_name,
+            "value": commune_id
+        })
+
+    dropdown = html.Label(dcc.Dropdown(
+    id='dropdown',
+    options=options,
+    placeholder="Select a commune"))
+
+    return dropdown
+
+graphy_data = create_graph()
+cyto.load_extra_layouts()
+
+app = dash.Dash(__name__)
+
+
+legend = generate_legend(COLORMAP)
+dropdown = generate_commune_selector()
+graph = cyto.Cytoscape(
     id='cytoscape',
-    elements=elements,
     layout={
-        'name': 'dagre',
+        'name': 'klay',
         'animate': False},
         style={'width': '{}px'.format(SCREEN_WIDTH), 'height': '{}px'.format(SCREEN_HEIGHT)}
-        )]
+        )
 
-app.layout = html.Div(legend+graph)
-
+app.layout = html.Div(children=[legend, dropdown, graph])
 
 
 default_stylesheet = [
@@ -94,12 +74,38 @@ default_stylesheet = [
     "style": {
         'target-arrow-color': 'data(color)',
         'target-arrow-shape': 'triangle',
-        "line-color": "data(color)"
-    }}]
+        "curve-style": "bezier",
+        "line-color": "data(color)",
+        "target-arrow-color": 'data(color)',
+        "target-arrow-shape": 'triangle',
+        "curve-style": "bezier",
+        'z-index': 9999
+    }},
+    {"selector": "node",
+    "style": {
+        "background-color": "grey",
+        "label": "data(label)",
+        "width": "20px",
+        "height": "20px"
+    }
+    }]
+
+@app.callback(
+    dash.dependencies.Output('cytoscape', 'elements'),
+    [dash.dependencies.Input('dropdown', 'value')])
+def generate_graph_view(value):
+
+    if not value:
+        return []
+
+    subgraph = get_subgraph(graphy_data, value)
+    items = networkx2cytoscape(subgraph)
+
+    return items
+
 
 @app.callback(Output('cytoscape', 'stylesheet'),
              [Input('cytoscape', 'tapNode')])
-
 def generate_stylesheet(node):
 
     if not node:
@@ -107,18 +113,30 @@ def generate_stylesheet(node):
 
     stylesheet = [
         {
+            "selector": "node",
+            "style": {
+                "background-color": "grey",
+                "label": "data(label)",
+                "width": "20px",
+                "height": "20px"
+            }
+        },
+        {
             "selector": 'node[id = "{}"]'.format(node['data']['id']),
             'style': {
-                'background-color': 'green',
-                'label': 'data(label)',
+                'background-color': 'yellow',
                 'z-index': 9999}
         },
         {
             "selector": 'edge',
             "style": {
+                'target-arrow-color': 'data(color)',
+                'target-arrow-shape': 'triangle',
+                "curve-style": "bezier",
                 "line-color": "data(color)",
                 "target-arrow-color": 'data(color)',
                 "target-arrow-shape": 'triangle',
+                "curve-style": "bezier",
                 'z-index': 9999
             }
         },
