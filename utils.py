@@ -1,16 +1,11 @@
 from api_clients import Classifications
 import networkx as nx
 
+colors = ['rgb(12,51,131)', 'rgb(10,136,186)', 'rgb(242,211,56)', 'rgb(242,143,56)', 'rgb(217,30,30)']
+labels = ["renamed", "reshaped", "formed", "merged to", "splitted to"]
+COLORMAP = dict(zip(labels, colors))
 
 LAST_YEAR = 2020
-COLORMAP = {
-    "renamed": "black",
-    "reshaped": "blue",
-    "formed": "green",
-    "merged to": "orange",
-    "splitted to": "violet",
-    "changed district/kanton": "grey"
-}
 
 
 def get_municipal_data():
@@ -19,7 +14,7 @@ def get_municipal_data():
     df = Classifications().getMunicipalEvents()
 
     events = {
-        ("Neue Bezirks-/Kantonszuteilung", "Neue Bezirks-/Kantonszuteilung"): "changed district/kanton",
+        ("Neue Bezirks-/Kantonszuteilung", "Neue Bezirks-/Kantonszuteilung"): None,
         ("Aufhebung Gemeinde/Bezirk", "Neugründung Gemeinde/Bezirk"): "formed",         # merge multiple to new one
         ("Aufhebung Gemeinde/Bezirk", "Gebietsänderung Gemeinde"): "merged to",         # merge to existing commune
         ("Gebietsänderung Gemeinde", "Gebietsänderung Gemeinde"): "reshaped",
@@ -31,9 +26,21 @@ def get_municipal_data():
     df.child_abolition.fillna(value=LAST_YEAR, inplace=True)
     df.child_abolition = df.child_abolition.astype(int)
 
-    df["parent"] = df["parent_name"] + " (" + df["parent_admission"].astype(str) + "-" + df["parent_abolition"].astype(str) + ")"
-    df["child"] = df["child_name"] + " (" + df["child_admission"].astype(str) + "-" + df["child_abolition"].astype(str) + ")"
-    #df["child"] = df.apply(lambda x: x.child_name + x.child_dates if x.child_dates else x.child_name, axis=1)
+    df["parent"] = df["parent_name"] + df["parent_admission"].astype(str) + "-" + df["parent_abolition"].astype(str)
+    df["child"] = df["child_name"] + df["child_admission"].astype(str) + "-" + df["child_abolition"].astype(str)
+
+    # Remove data on kanton change
+    is_irrelevant_data = df["event"].isnull()
+    for row in df[is_irrelevant_data].itertuples():
+        is_parent = df["child"] == row.parent
+        df.loc[is_parent, ["child_abolition"]] = row.child_abolition
+
+        is_child = df["parent"] == row.child
+        df.loc[is_child, ["parent_admission"]] = row.parent_admission
+
+    df = df[~is_irrelevant_data]
+    df["parent"] = df["parent_name"] + df["parent_admission"].astype(str) + "-" + df["parent_abolition"].astype(str)
+    df["child"] = df["child_name"] + df["child_admission"].astype(str) + "-" + df["child_abolition"].astype(str)
 
     return df
 
@@ -47,9 +54,6 @@ def get_communes():
 
 def create_graph():
 
-    start = 1960
-    x_len = LAST_YEAR-start
-
     df = get_municipal_data()
     graph = nx.DiGraph()
 
@@ -62,7 +66,6 @@ def create_graph():
             graph.add_edge(row.parent, row.child, date=row.eventdate.year, event=row.event, color=COLORMAP[row.event])
 
     return graph
-
 
 def get_subgraph(graph: nx.Graph, node: str):
 
@@ -89,12 +92,3 @@ def networkx2cytoscape(graph: nx.Graph):
         })
 
     return items
-
-
-if __name__ == "__main__":
-
-    graph = create_graph()
-    node = "Marly (1970-1976)"
-    subgraph = get_subgraph(graph, node)
-    print(networkx2cytoscape(subgraph))
-

@@ -4,11 +4,8 @@ import dash_core_components as dcc
 import dash_cytoscape as cyto
 from dash.dependencies import Input, Output
 
-
 from utils import get_communes, COLORMAP, create_graph, get_subgraph, networkx2cytoscape
-
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 600
+from styles import edge_default, node_default, edge_selected, node_selected
 
 def generate_legend(colormap):
 
@@ -36,17 +33,21 @@ def generate_legend(colormap):
 def generate_commune_selector():
 
     communes = get_communes()
-    options = []
-    for commune_id, commune_name in sorted(communes.items()):
-        options.append({
-            "label": commune_name,
-            "value": commune_id
-        })
 
-    dropdown = html.Label(dcc.Dropdown(
+    options = []
+    shown = set()
+    for identifier, name in sorted(communes.items()):
+        if name not in shown:
+            options.append({
+                "label": name,
+                "value": identifier
+            })
+            shown.add(name)
+
+    dropdown = html.Form(autoComplete="off", children = [dcc.Dropdown(
     id='dropdown',
     options=options,
-    placeholder="Select a commune"))
+    placeholder="Select a commune")])
 
     return dropdown
 
@@ -55,7 +56,6 @@ cyto.load_extra_layouts()
 
 app = dash.Dash(__name__)
 
-
 legend = generate_legend(COLORMAP)
 dropdown = generate_commune_selector()
 graph = cyto.Cytoscape(
@@ -63,32 +63,11 @@ graph = cyto.Cytoscape(
     layout={
         'name': 'klay',
         'animate': False},
-        style={'width': '{}px'.format(SCREEN_WIDTH), 'height': '{}px'.format(SCREEN_HEIGHT)}
+        style={'width': '95vw', 'height': '80vh'},
+        maxZoom=6
         )
 
-app.layout = html.Div(children=[legend, dropdown, graph])
-
-
-default_stylesheet = [
-    {"selector": "edge",
-    "style": {
-        'target-arrow-color': 'data(color)',
-        'target-arrow-shape': 'triangle',
-        "curve-style": "bezier",
-        "line-color": "data(color)",
-        "target-arrow-color": 'data(color)',
-        "target-arrow-shape": 'triangle',
-        "curve-style": "bezier",
-        'z-index': 9999
-    }},
-    {"selector": "node",
-    "style": {
-        "background-color": "grey",
-        "label": "data(label)",
-        "width": "20px",
-        "height": "20px"
-    }
-    }]
+app.layout = html.Div(children=[dropdown, graph, legend])
 
 @app.callback(
     dash.dependencies.Output('cytoscape', 'elements'),
@@ -109,47 +88,34 @@ def generate_graph_view(value):
 def generate_stylesheet(node):
 
     if not node:
-       return default_stylesheet
+
+        default_stylesheet = [
+            {"selector": "edge",
+            "style": edge_default},
+            {"selector": "node",
+            "style": node_default}
+        ]
+        return default_stylesheet
 
     stylesheet = [
         {
             "selector": "node",
-            "style": {
-                "background-color": "grey",
-                "label": "data(label)",
-                "width": "20px",
-                "height": "20px"
-            }
+            "style": node_default
         },
         {
             "selector": 'node[id = "{}"]'.format(node['data']['id']),
-            'style': {
-                'background-color': 'yellow',
-                'z-index': 9999}
+            'style': node_selected
         },
         {
             "selector": 'edge',
-            "style": {
-                'target-arrow-color': 'data(color)',
-                'target-arrow-shape': 'triangle',
-                "curve-style": "bezier",
-                "line-color": "data(color)",
-                "target-arrow-color": 'data(color)',
-                "target-arrow-shape": 'triangle',
-                "curve-style": "bezier",
-                'z-index': 9999
-            }
+            "style": edge_default
         },
         {
             "selector": "edge[source = '{}'].".format(node["data"]["id"]),
-            "style": {
-                "label": "data(date)"
-            }
+            "style": edge_selected
         },{
             "selector": "edge[target = '{}'].".format(node["data"]["id"]),
-            "style": {
-                "label": "data(date)"
-            }
+            "style": edge_selected
         }]
 
     return stylesheet
