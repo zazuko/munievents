@@ -1,3 +1,4 @@
+[tool]
 [tool.poetry]
 name = "munievents"
 version = "0.1.0"
@@ -5,17 +6,17 @@ description = ""
 authors = ["Magdalena Surowka <magdalena.surowka@zazuko.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-dash = "^1.18.1"
-requests = "^2.25.1"
-dash_html_components = "^1.1.1"
-pandas = "^1.2.0"
-networkx = "^2.5"
-dash_cytoscape = "^0.2.0"
+python = ">=3.8"
+dash = "==1.*,>=1.18.1"
+dash-cytoscape = "==0.*,>=0.2.0"
+dash-html-components = "==1.*,>=1.1.1"
+networkx = "==2.*,>=2.5.0"
+pandas = "==1.*,>=1.2.0"
+requests = "==2.*,>=2.25.1"
+
+[tool.poetry.scripts]
+munievents = "munievents.main:app.run_server"
 
 [tool.poetry.dev-dependencies]
-black = {version = "^20.8b1", allow-prereleases = true}
-
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+black = "==20.*,>=20.8.0.b1"
+dephell = "==0.*,>=0.8.3"

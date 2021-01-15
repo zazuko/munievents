@@ -7,7 +7,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-from exceptions import NotFoundError
+from munievents.exceptions import NotFoundError
 import pandas as pd
 
 XML_TYPES_TO_PYTHON_CLS = {
@@ -40,6 +40,7 @@ def requests_retry_session(
 
 class SparqlClient:
 
+    BASE_URL = None
     last_request = 0
     HEADERS = {
         'Accept': 'application/sparql-results+json',
@@ -105,7 +106,7 @@ class Classifications(SparqlClient):
 
     BASE_URL = "http://classifications.data.admin.ch/query"
 
-    def getMunicipalEvents(self):
+    def getMunicipalEvents(self) -> pd.DataFrame:
 
         query = """
         PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
@@ -113,7 +114,7 @@ class Classifications(SparqlClient):
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX ech71: <http://classifications.data.admin.ch/code/ech0071/>
 
-        SELECT ?parent_name ?parent_admission ?parent_abolition ?child_name ?child_admission ?child_abolition ?eventdate ?ab_label ?ad_label
+        SELECT DISTINCT ?parent_name ?parent_admission ?parent_abolition ?child_name ?child_admission ?child_abolition ?eventdate ?ab_label ?ad_label
         WHERE {
 
         ?event a gont:MunicipalityChangeEvent ;
