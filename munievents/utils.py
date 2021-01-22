@@ -1,6 +1,9 @@
-from munievents.api_clients import Classifications
+# -*- coding: utf-8 -*-
+from typing import Dict, List
+
 import networkx as nx
-from typing import List, Dict
+
+from munievents.api_clients import Classifications
 
 colors = [
     "rgb(12,51,131)",

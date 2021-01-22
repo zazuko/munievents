@@ -1,17 +1,18 @@
+# -*- coding: utf-8 -*-
 import dash
-import dash_html_components as html
 import dash_core_components as dcc
 import dash_cytoscape as cyto
+import dash_html_components as html
 from dash.dependencies import Input, Output
 
+from munievents.styles import edge_default, edge_selected, node_default, node_selected
 from munievents.utils import (
-    get_communes,
     COLORMAP,
     create_graph,
+    get_communes,
     get_subgraph,
     networkx2cytoscape,
 )
-from munievents.styles import edge_default, node_default, edge_selected, node_selected
 
 
 def generate_legend(colormap):

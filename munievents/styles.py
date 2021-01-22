@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 edge_default = {
     "width": 1,
     "target-arrow-color": "data(color)",
@@ -22,4 +23,10 @@ edge_selected = {
     "color": "#555555",
     "z-index": 9999,
 }
-node_selected = {"background-color": "#88ba0a", "z-index": 999, "width": "10px", "height": "10px", "font-size": "6px"}
+node_selected = {
+    "background-color": "#88ba0a",
+    "z-index": 999,
+    "width": "10px",
+    "height": "10px",
+    "font-size": "6px",
+}

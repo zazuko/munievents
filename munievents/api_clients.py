@@ -3,12 +3,12 @@ import time
 from datetime import date, datetime
 from typing import Dict
 
+import pandas as pd
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
 from munievents.exceptions import NotFoundError
-import pandas as pd
 
 XML_TYPES_TO_PYTHON_CLS = {
     "http://www.w3.org/2001/XMLSchema#integer": int,
