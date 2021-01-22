@@ -107,6 +107,28 @@ class Classifications(SparqlClient):
     BASE_URL = "http://classifications.data.admin.ch/query"
 
     def getMunicipalEvents(self) -> pd.DataFrame:
+        """ Get all municipal events, except for changing kanton/bezirk.
+            Events covered are:
+                - Namensänderung Gemeinde,
+                - Neugründung Gemeinde/Bezirk,
+                - Gebietsänderung Gemeinde,
+                - Aufhebung Gemeinde/Bezirk,
+                - Neue Bezirks-/Kantonszuteilung
+            Args:
+                None:
+
+            Returns:
+                pd.DataFrame:   municipal events. Includes columns:
+                                - parent_name,
+                                - parent_admission (yyyy),
+                                - parent_abolition (yyyy),
+                                - child_name,
+                                - child_admission (yyyy),
+                                - child_abolition (yyyy),
+                                - eventdate (yyyy-mm-dd),
+                                - ab_label,
+                                - ad_label
+        """
 
         query = """
         PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
