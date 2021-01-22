@@ -1,3 +1,10 @@
+# Munievents
+
+Munievents is a tool visualizing events in swiss municipalities. Swiss communes are very dynamic, and adjust to the popluation needs. They change their names, adjust the territory, merge with other communes or split into multiple new communes. Munievents visualizes all such events. The data covers all swiss communes and associated events since 1960.
+
+This is what you can expect from munievents app:
+![sample event](example.png?raw=true)
+
 ## Installation
 
 To setup munievents app locally:
