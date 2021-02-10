@@ -103,7 +103,6 @@ graph = cyto.Cytoscape(
 
 app.layout = html.Div(children=[dropdown, graph, legend])
 
-
 @app.callback(
     dash.dependencies.Output("cytoscape", "elements"),
     [dash.dependencies.Input("dropdown", "value")],
@@ -163,5 +162,13 @@ def generate_stylesheet(node) -> List[StylesheetItem]:
 
     return stylesheet
 
+# Healthcheck route that returns a 200
+@app.server.route("/healthz")
+def healthcheck():
+    return "OK"
 
-app.run_server(debug=True)
+# Expose the WSGI server to use with gunicorn
+server = app.server
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
