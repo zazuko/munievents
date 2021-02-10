@@ -40,3 +40,11 @@ spec:
             httpGet:
               path: "/healthz"
               port: http
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
