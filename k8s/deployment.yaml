@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: munievents
+spec:
+  replicas: 2
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+
+      containers:
+        - name: curator
+          image: registry.zazuko.com/docker/munievents
+          imagePullPolicy: Always
+
+          securityContext:
+            readOnlyRootFilesystem: true
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+
+          resources:
+            limits:
+              cpu: 500m
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+
+          livenessProbe:
+            httpGet:
+              path: "/healthz"
+              port: http
+            initialDelaySeconds: 30
+
+          readinessProbe:
+            httpGet:
+              path: "/healthz"
+              port: http
