@@ -5,3 +5,5 @@ settings.json
 munievents.egg-info
 Dockerfile
 .dockerignore
+dist
+.git
