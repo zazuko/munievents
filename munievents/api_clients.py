@@ -104,7 +104,7 @@ class SparqlClient:
 
 class Classifications(SparqlClient):
 
-    BASE_URL = "http://classifications.data.admin.ch/query"
+    BASE_URL = "http://lindas.admin.ch/query"
 
     def getMunicipalEvents(self) -> pd.DataFrame:
         """ Get all municipal events, except for changing kanton/bezirk.
