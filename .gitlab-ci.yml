@@ -6,7 +6,6 @@ default:
 stages:
   - build
   - push
-  - deploy
 
 # build Docker image
 build:
@@ -43,20 +42,3 @@ push:
   script:
     - crane auth login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
     - gitlab-docker-push image.tar "$CI_REGISTRY_IMAGE"
-
-# deploy to the Kubernetes cluster
-deploy:
-  stage: deploy
-  script:
-    - cd k8s/
-    - ensure-pull-secret
-    - set-gitlab-annotations
-    - kustomize edit set image "${CI_REGISTRY_IMAGE}:git-${CI_COMMIT_SHORT_SHA}"
-    - kustomize build | tee manifest.yaml
-    - kubectl apply -f manifest.yaml
-  environment:
-    name: production
-    kubernetes:
-      namespace: munievents
-  only:
-    - master
