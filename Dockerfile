@@ -3,13 +3,10 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # install dependencies
-RUN pip install gunicorn==20.0.4 poetry==1.1
-RUN poetry config virtualenvs.create false
-COPY pyproject.toml poetry.lock ./
-RUN poetry install
-
-# get source code
+COPY setup.py .
 COPY munievents munievents
+RUN pip install .
+RUN pip install gunicorn==20.1.0 werkzeug==2.0.3 flask==2.1.3
 
 EXPOSE 8080
 
